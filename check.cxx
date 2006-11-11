@@ -34,7 +34,7 @@ int main(int argc, char * argv[])
   rad.Fill( 10 );
   fillHole->SetRadius( rad );
 
-  typedef itk::SliceBySliceImageFilter< IType, IType, FillHoleType > FilterType;
+  typedef itk::SliceBySliceImageFilter< IType, IType > FilterType;
   FilterType::Pointer filter = FilterType::New();
   filter->SetInput( reader->GetOutput() );
   filter->SetFilter( fillHole );

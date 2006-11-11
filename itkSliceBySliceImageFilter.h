@@ -15,8 +15,7 @@ namespace itk {
  * \author Gaetan Lehmann
  */
 
-template<class TInputImage, class TOutputImage, class TFilter>
-//=ImageToImageFilter< Image< typename TInputImage::PixelType, TInputImage::ImageDimension - 1 >,  Image< typename TOutputImage::PixelType, TOutputImage::ImageDimension - 1 > > >
+template<class TInputImage, class TOutputImage, class TFilter=ImageToImageFilter< Image< typename TInputImage::PixelType, TInputImage::ImageDimension - 1 >,  Image< typename TOutputImage::PixelType, TOutputImage::ImageDimension - 1 > > >
 class ITK_EXPORT SliceBySliceImageFilter : 
 public ImageToImageFilter<TInputImage, TOutputImage>
 {
