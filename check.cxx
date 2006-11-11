@@ -2,7 +2,7 @@
 #include "itkImageFileWriter.h"
 #include "itkCommand.h"
 #include "itkSimpleFilterWatcher.h"
-#include "itkGrayscaleFillHoleImageFilter.h"
+#include "itkGrayscaleFillholeImageFilter.h"
 #include "itkMedianImageFilter.h"
 #include "itkSliceBySliceImageFilter.h"
 
