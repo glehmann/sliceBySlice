@@ -2,7 +2,7 @@
 #define __itkSliceBySliceImageFilter_txx
 
 #include "itkSliceBySliceImageFilter.h"
-#include "itkProgressAccumulator.h"
+#include "itkProgressReporter.h"
 
 namespace itk {
 
@@ -87,11 +87,15 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
   typename InputImageType::ConstPointer input = this->GetInput();
   typename OutputImageType::Pointer output = this->GetOutput();
 
+  ProgressReporter progress(this, 0, requestedSize[m_Dimension]);
+
+  // std::cout << "start: " << requestedIndex[m_Dimension] << "  end: " << requestedSize[m_Dimension] - requestedIndex[m_Dimension] << std::endl;
   for( int slice=requestedIndex[m_Dimension]; slice < requestedSize[m_Dimension] - requestedIndex[m_Dimension]; slice++ )
     {
+    // std::cout << "slice: " << slice << std::endl;
     // copy the current slice to the input image
     ImageRegionIterator< InternalInputImageType > iIt( internalInput, internalRegion );
-    for( iIt.Begin(); iIt.IsAtEnd(); ++iIt )
+    for( iIt.GoToBegin(); !iIt.IsAtEnd(); ++iIt )
       {
       IndexType idx;
       const InternalIndexType & iidx = iIt.GetIndex();
@@ -106,16 +110,18 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
           idx[i] = iidx[i];
           }
         }
-        idx[ m_Dimension ] = slice;
+      idx[ m_Dimension ] = slice;
       iIt.Set( input->GetPixel( idx ) );
+      // std::cout << idx << "  " << iIt.Get() << std::endl;
       }
 
     // run the filter on the current slice
     m_Filter->UpdateLargestPossibleRegion();
+    progress.CompletedPixel();
     
     // and copy the output slice to the output image
     ImageRegionConstIterator< InternalOutputImageType > oIt( m_Filter->GetOutput(), internalRegion );
-    for( oIt.Begin(); oIt.IsAtEnd(); ++oIt )
+    for( oIt.GoToBegin(); !oIt.IsAtEnd(); ++oIt )
       {
       IndexType idx;
       const InternalIndexType & iidx = oIt.GetIndex();
@@ -132,6 +138,7 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
         }
         idx[ m_Dimension ] = slice;
       output->SetPixel( idx, oIt.Get() );
+      // std::cout << idx << "  " << oIt.Get() << std::endl;
       }
     }
 }

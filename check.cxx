@@ -12,7 +12,7 @@ int main(int argc, char * argv[])
 
   if( argc != 3 )
     {
-    std::cerr << "usage: " << argv[0] << " " << std::endl;
+    std::cerr << "usage: " << argv[0] << " input output" << std::endl;
     // std::cerr << "  : " << std::endl;
     exit(1);
     }
@@ -30,6 +30,9 @@ int main(int argc, char * argv[])
   typedef itk::MedianImageFilter< IType2, IType2 > FillHoleType;
 //  typedef itk::GrayscaleFillHoleImageFilter< IType2, IType2 > FillHoleType;
   FillHoleType::Pointer fillHole = FillHoleType::New();
+  FillHoleType::InputSizeType rad;
+  rad.Fill( 10 );
+  fillHole->SetRadius( rad );
 
   typedef itk::SliceBySliceImageFilter< IType, IType, FillHoleType > FilterType;
   FilterType::Pointer filter = FilterType::New();
