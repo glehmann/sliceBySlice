@@ -18,16 +18,6 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
 template<class TInputImage, class TOutputImage, class TFilter>
 void
 SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
-::Modified() const
-{
-  Superclass::Modified();
-  m_Filter->Modified();
-}
-
-
-template<class TInputImage, class TOutputImage, class TFilter>
-void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
 ::GenerateInputRequestedRegion()
 {
   // call the superclass' implementation of this method

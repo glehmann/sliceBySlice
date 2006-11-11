@@ -73,8 +73,6 @@ public:
   void GenerateInputRequestedRegion() ;
   void EnlargeOutputRequestedRegion(DataObject *itkNotUsed(output));
 
-  virtual void Modified() const;
-
 protected:
   SliceBySliceImageFilter();
   ~SliceBySliceImageFilter() {};
