@@ -1,8 +1,7 @@
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
-#include "itkCommand.h"
 #include "itkSimpleFilterWatcher.h"
-#include "itkGrayscaleFillholeImageFilter.h"
+
 #include "itkMedianImageFilter.h"
 #include "itkSliceBySliceImageFilter.h"
 
@@ -13,7 +12,6 @@ int main(int argc, char * argv[])
   if( argc != 3 )
     {
     std::cerr << "usage: " << argv[0] << " input output" << std::endl;
-    // std::cerr << "  : " << std::endl;
     exit(1);
     }
 
@@ -21,23 +19,23 @@ int main(int argc, char * argv[])
   
   typedef unsigned char PType;
   typedef itk::Image< PType, dim > IType;
-  typedef itk::Image< PType, dim-1 > IType2;
 
   typedef itk::ImageFileReader< IType > ReaderType;
   ReaderType::Pointer reader = ReaderType::New();
   reader->SetFileName( argv[1] );
 
-  typedef itk::MedianImageFilter< IType2, IType2 > FillHoleType;
-//  typedef itk::GrayscaleFillHoleImageFilter< IType2, IType2 > FillHoleType;
-  FillHoleType::Pointer fillHole = FillHoleType::New();
-  FillHoleType::InputSizeType rad;
-  rad.Fill( 5 );
-  fillHole->SetRadius( rad );
-
   typedef itk::SliceBySliceImageFilter< IType, IType > FilterType;
   FilterType::Pointer filter = FilterType::New();
   filter->SetInput( reader->GetOutput() );
-  filter->SetFilter( fillHole );
+
+  typedef itk::MedianImageFilter< FilterType::InternalInputImageType,
+                                  FilterType::InternalOutputImageType > MedianType;
+  MedianType::Pointer median = MedianType::New();
+  MedianType::InputSizeType rad;
+  rad.Fill( 5 );
+  median->SetRadius( rad );
+
+  filter->SetFilter( median );
 
   itk::SimpleFilterWatcher watcher(filter, "filter");
 

@@ -33,16 +33,17 @@ colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 
 % The title should be descriptive enough for people to be able to find
 % the relevant document. 
-\title{}
+\title{Slice by slice filtering with ITK}
 
 % Increment the release number whenever significant changes are made.
 % The author and/or editor can define 'significant' however they like.
-\release{0.00}
+% \release{0.00}
 
 % At minimum, give your name and an email address.  You can include a
 % snail-mail address if you like.
-\author{}
-\authoraddress{}
+\author{Ga\"etan Lehmann}
+\authoraddress{INRA, UMR 1198; ENVA; CNRS, FRE 2857, Biologie du D\'eveloppement et
+Reproduction, Jouy en Josas, F-78350, France}
 
 \begin{document}
 \maketitle
@@ -54,11 +55,100 @@ colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 
 \begin{abstract}
 \noindent
-% The abstract should be a paragraph or two long, and describe the
-% scope of the document.
+While filtering in N dimensions is a main feature of ITK, filtering an image
+in N-1 dimensions, slice by slice, can be very useful in many cases. Currently,
+this operation require a consequent amount of work to be done with ITK. A new
+filter is provided with this article to perform this operation with only a few
+lines of code.
 \end{abstract}
 
-\tableofcontents
+% \tableofcontents
+
+
+\section{Description and code example}
+
+This filter is better descibed by a simple example. For example, suppose we want to perform
+a median filtering on all the slices of an image\footnote{SliceBySliceImageFilter is not required
+in that case: the most simple solution is to set the radius to 0 on one dimension - that's only an
+example.}
+
+We first do the standard includes, and check the command line arguments.
+
+\small \begin{verbatim}
+#include "itkImageFileReader.h"
+#include "itkImageFileWriter.h"
+#include "itkSimpleFilterWatcher.h"
+
+#include "itkMedianImageFilter.h"
+#include "itkSliceBySliceImageFilter.h"
+
+
+int main(int argc, char * argv[])
+{
+
+  if( argc != 3 )
+    {
+    std::cerr << "usage: " << argv[0] << " input output" << std::endl;
+    exit(1);
+    }
+\end{verbatim} \normalsize
+The dimension of the image, the pixel type, and the image type are declared.
+A file reader is created.
+\small \begin{verbatim}
+  const int dim = 3;
+  typedef unsigned char PType;
+  typedef itk::Image< PType, dim > IType;
+ 
+ typedef itk::ImageFileReader< IType > ReaderType;
+  ReaderType::Pointer reader = ReaderType::New();
+  reader->SetFileName( argv[1] );
+\end{verbatim} \normalsize
+We then declare the type of the SliceBySliceImageFilter, instantiate
+a filter, and set the image from the reader as input. At this point,
+the filter can't do anything: the developper have to give him a filter
+which will be used internally to perform the transform on all the classes.
+\small \begin{verbatim}
+  typedef itk::SliceBySliceImageFilter< IType, IType > FilterType;
+  FilterType::Pointer filter = FilterType::New();
+  filter->SetInput( reader->GetOutput() );
+\end{verbatim} \normalsize
+We declare the type of the internal filter - a median - using the type defined
+in the SliceBySliceImageFilter, instantiate it, and set the options correctly.
+InternalInputImageType, and InternalOutputImageType
+are the same type than the input and output image type of the SliceBySliceImageFilter,
+but decreased of one dimension - here both are \verb$itk::Image< unsigned char, 2 >$.
+\small \begin{verbatim}
+  typedef itk::MedianImageFilter< FilterType::InternalInputImageType,
+                                  FilterType::InternalOutputImageType > MedianType;
+  MedianType::Pointer median = MedianType::New();
+  MedianType::InputSizeType rad;
+  rad.Fill( 5 );
+  median->SetRadius( rad );
+\end{verbatim} \normalsize
+The median is passed to the slice by slice filter using \verb$SetFilter()$.
+\small \begin{verbatim}
+  filter->SetFilter( median );
+\end{verbatim} \normalsize
+Finally, the output is wrote to a file. When \verb$Update()$ is called, the
+slice by slice filter runs the median filter on all the slices of the image,
+and store the result in its output image. The dimension reduced to pass to
+dimension N-1 can be selected with \verb$SetDimension()$ and defaults to
+the highest one.
+\small \begin{verbatim}
+  itk::SimpleFilterWatcher watcher(filter, "filter");
+
+  typedef itk::ImageFileWriter< IType > WriterType;
+  WriterType::Pointer writer = WriterType::New();
+  writer->SetInput( filter->GetOutput() );
+  writer->SetFileName( argv[2] );
+  writer->Update();
+
+  return 0;
+}
+\end{verbatim} \normalsize
+
+\section{Conclusion}
+The new provided class gives an easy way to perform a slice by slice transform of an image.
 
 
 % \url{http://www.itk.org}
@@ -80,11 +170,11 @@ colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 
 % \ref{cthead1}
 
-\begin{figure}[htbp]
-\centering
-\includegraphics{cthead1}
-\caption{The input image.\label{cthead1}}
-\end{figure}
+% \begin{figure}[htbp]
+% \centering
+% \includegraphics{cthead1}
+% \caption{The input image.\label{cthead1}}
+% \end{figure}
 
 
 \appendix
