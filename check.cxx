@@ -31,7 +31,7 @@ int main(int argc, char * argv[])
 //  typedef itk::GrayscaleFillHoleImageFilter< IType2, IType2 > FillHoleType;
   FillHoleType::Pointer fillHole = FillHoleType::New();
   FillHoleType::InputSizeType rad;
-  rad.Fill( 10 );
+  rad.Fill( 5 );
   fillHole->SetRadius( rad );
 
   typedef itk::SliceBySliceImageFilter< IType, IType > FilterType;

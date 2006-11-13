@@ -116,6 +116,7 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
       }
 
     // run the filter on the current slice
+    m_Filter->Modified();
     m_Filter->UpdateLargestPossibleRegion();
     progress.CompletedPixel();
     
