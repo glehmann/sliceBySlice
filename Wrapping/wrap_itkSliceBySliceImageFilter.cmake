@@ -1,4 +1,4 @@
-WRAP_CLASS("itk::SliceBySliceImageFilter")
+WRAP_CLASS("itk::SliceBySliceImageFilter" POINTER)
   FOREACH(d ${WRAP_ITK_DIMS})
     MATH(EXPR d_1 "${d} - 1")
     FILTER_DIMS(has_d_1 ${d_1})
