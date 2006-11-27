@@ -196,6 +196,8 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
         }
 
       }
+
+    this->InvokeEvent( IterationEvent() );
     }
 }
 
