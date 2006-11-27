@@ -66,7 +66,8 @@ public:
   itkSetMacro(Dimension, unsigned int);
   itkGetMacro(Dimension, unsigned int);
 
-  itkSetObjectMacro(Filter, FilterType);
+  // itkSetObjectMacro(Filter, FilterType);
+  void SetFilter(FilterType * filter);
   itkGetObjectMacro(Filter, FilterType);
 
   void GenerateInputRequestedRegion() ;
