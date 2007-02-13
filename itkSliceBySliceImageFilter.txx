@@ -6,8 +6,8 @@
 
 namespace itk {
 
-template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
-SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter, class TInternalInputImageType, class TInternalOutputImageType>
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter, TInternalInputImageType, TInternalOutputImageType>
 ::SliceBySliceImageFilter()
 {
   m_InputFilter = NULL;
@@ -16,9 +16,9 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
 }
 
 
-template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter, class TInternalInputImageType, class TInternalOutputImageType>
 void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter, TInternalInputImageType, TInternalOutputImageType>
 ::GenerateInputRequestedRegion()
 {
   // call the superclass' implementation of this method
@@ -37,9 +37,9 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
 }
 
 
-template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter, class TInternalInputImageType, class TInternalOutputImageType>
 void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter, TInternalInputImageType, TInternalOutputImageType>
 ::EnlargeOutputRequestedRegion(DataObject *)
 {
   for( int i=0; i<this->GetNumberOfOutputs(); i++)
@@ -49,9 +49,9 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
 }
 
 
-template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter, class TInternalInputImageType, class TInternalOutputImageType>
 void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter, TInternalInputImageType, TInternalOutputImageType>
 ::SetFilter( InputFilterType * filter )
 {
   OutputFilterType * outputFilter = dynamic_cast< OutputFilterType * >( filter );
@@ -64,9 +64,9 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
 }
 
 
-template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter, class TInternalInputImageType, class TInternalOutputImageType>
 void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter, TInternalInputImageType, TInternalOutputImageType>
 ::SetInputFilter( InputFilterType * filter )
 {
   if( m_InputFilter.GetPointer() != filter )
@@ -79,9 +79,9 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
 }
 
 
-template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter, class TInternalInputImageType, class TInternalOutputImageType>
 void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter, TInternalInputImageType, TInternalOutputImageType>
 ::SetOutputFilter( OutputFilterType * filter )
 {
   if( m_OutputFilter.GetPointer() != filter )
@@ -94,9 +94,9 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
 }
 
 
-template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter, class TInternalInputImageType, class TInternalOutputImageType>
 void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter, TInternalInputImageType, TInternalOutputImageType>
 ::GenerateData()
 {
   if( !m_InputFilter || !m_OutputFilter )
@@ -233,9 +233,9 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
 }
 
 
-template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter, class TInternalInputImageType, class TInternalOutputImageType>
 void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter, TInternalInputImageType, TInternalOutputImageType>
 ::PrintSelf(std::ostream &os, Indent indent) const
 {
   Superclass::PrintSelf(os, indent);

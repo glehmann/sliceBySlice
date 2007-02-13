@@ -15,7 +15,12 @@ namespace itk {
  * \author Gaetan Lehmann
  */
 
-template<class TInputImage, class TOutputImage, class TInputFilter=ImageToImageFilter< Image< typename TInputImage::PixelType, TInputImage::ImageDimension - 1 >,  Image< typename TOutputImage::PixelType, TOutputImage::ImageDimension - 1 > >, class TOutputFilter=TInputFilter >
+template<class TInputImage,
+  class TOutputImage,
+  class TInputFilter=ImageToImageFilter< Image< typename TInputImage::PixelType, TInputImage::ImageDimension - 1 >,  Image< typename TOutputImage::PixelType, TOutputImage::ImageDimension - 1 > >,
+  class TOutputFilter=TInputFilter,
+  class TInternalInputImage=typename TInputFilter::InputImageType,
+  class TInternalOutputImage=typename TOutputFilter::OutputImageType >
 class ITK_EXPORT SliceBySliceImageFilter : 
 public ImageToImageFilter<TInputImage, TOutputImage>
 {
@@ -47,14 +52,14 @@ public:
   typedef TInputFilter  InputFilterType ;
   typedef TOutputFilter OutputFilterType ;
   
-  typedef typename InputFilterType::InputImageType InternalInputImageType;
+  typedef TInternalInputImage InternalInputImageType;
   typedef typename InternalInputImageType::RegionType InternalRegionType ;
   typedef typename InternalInputImageType::SizeType InternalSizeType ;
   typedef typename InternalInputImageType::IndexType InternalIndexType ;
   typedef typename InternalInputImageType::OffsetType InternalOffsetType ;
   typedef typename InternalInputImageType::PixelType InternalInputPixelType ;
 
-  typedef typename OutputFilterType::OutputImageType InternalOutputImageType;
+  typedef TInternalOutputImage InternalOutputImageType;
   typedef typename InternalOutputImageType::PixelType InternalOutputPixelType ;
 
   /** Image related typedefs. */
