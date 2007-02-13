@@ -10,7 +10,7 @@ INCLUDE(IJMacros.txt)
 #The following lines are required to use Dart
 ENABLE_TESTING()
 INCLUDE(Dart)
-FIND_PROGRAM(IMAGE_COMPARE ImageCompare)
+FIND_PROGRAM(ITK_TEST_DRIVER itkTestDriver)
 
 #Declare any external dependencies that your project may have here.
 #examples include: ITK, VTK, JPEG, PNG, OpenGL, ZLIB, Perl, Java
@@ -66,6 +66,10 @@ SET(CurrentExe "check")
 ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
 TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
 
+SET(CurrentExe "check2")
+ADD_EXECUTABLE(${CurrentExe} ${CurrentExe}.cxx)
+TARGET_LINK_LIBRARIES(${CurrentExe} ${Libraries})
+
 ENDIF(BUILD_TESTING)
 
 #the following line is an example of how to add a test to your project.
@@ -76,5 +80,10 @@ ENDIF(BUILD_TESTING)
 #any tests you can comment out or delete the following line.
 # ADD_TEST(Testname ExecutableToRun arg1 arg2 arg3)
 
-ADD_TEST(Run check ${INPUT_IMAGE} out.tif)
-ADD_TEST(CompareImage ${IMAGE_COMPARE} out.tif ${CMAKE_SOURCE_DIR}/images/test.tif)
+ADD_TEST(Same ${ITK_TEST_DRIVER} ${CMAKE_BINARY_DIR}/check ${INPUT_IMAGE} out.tif
+  --compare out.tif ${CMAKE_SOURCE_DIR}/images/test.tif
+)
+
+ADD_TEST(Different ${ITK_TEST_DRIVER} ${CMAKE_BINARY_DIR}/check2 ${INPUT_IMAGE} out2.tif
+  --compare out2.tif ${CMAKE_SOURCE_DIR}/images/test2.tif
+)

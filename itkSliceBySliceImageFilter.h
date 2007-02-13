@@ -15,7 +15,7 @@ namespace itk {
  * \author Gaetan Lehmann
  */
 
-template<class TInputImage, class TOutputImage, class TFilter=ImageToImageFilter< Image< typename TInputImage::PixelType, TInputImage::ImageDimension - 1 >,  Image< typename TOutputImage::PixelType, TOutputImage::ImageDimension - 1 > > >
+template<class TInputImage, class TOutputImage, class TInputFilter=ImageToImageFilter< Image< typename TInputImage::PixelType, TInputImage::ImageDimension - 1 >,  Image< typename TOutputImage::PixelType, TOutputImage::ImageDimension - 1 > >, class TOutputFilter=TInputFilter >
 class ITK_EXPORT SliceBySliceImageFilter : 
 public ImageToImageFilter<TInputImage, TOutputImage>
 {
@@ -44,16 +44,17 @@ public:
   typedef TOutputImage OutputImageType;
   typedef typename TOutputImage::PixelType OutputPixelType ;
 
-  typedef TFilter FilterType ;
+  typedef TInputFilter  InputFilterType ;
+  typedef TOutputFilter OutputFilterType ;
   
-  typedef typename FilterType::InputImageType InternalInputImageType;
+  typedef typename InputFilterType::InputImageType InternalInputImageType;
   typedef typename InternalInputImageType::RegionType InternalRegionType ;
   typedef typename InternalInputImageType::SizeType InternalSizeType ;
   typedef typename InternalInputImageType::IndexType InternalIndexType ;
   typedef typename InternalInputImageType::OffsetType InternalOffsetType ;
   typedef typename InternalInputImageType::PixelType InternalInputPixelType ;
 
-  typedef typename FilterType::OutputImageType InternalOutputImageType;
+  typedef typename OutputFilterType::OutputImageType InternalOutputImageType;
   typedef typename InternalOutputImageType::PixelType InternalOutputPixelType ;
 
   /** Image related typedefs. */
@@ -67,8 +68,22 @@ public:
   itkGetMacro(Dimension, unsigned int);
 
   // itkSetObjectMacro(Filter, FilterType);
-  void SetFilter(FilterType * filter);
-  itkGetObjectMacro(Filter, FilterType);
+  void SetFilter(InputFilterType * filter);
+  InputFilterType * GetFilter()
+    {
+    return m_InputFilter;
+    }
+
+  const InputFilterType * GetFilter() const
+    {
+    return m_InputFilter;
+    }
+
+  void SetInputFilter(InputFilterType * filter);
+  itkGetObjectMacro(InputFilter, InputFilterType);
+
+  void SetOutputFilter(OutputFilterType * filter);
+  itkGetObjectMacro(OutputFilter, OutputFilterType);
 
   void GenerateInputRequestedRegion() ;
   void EnlargeOutputRequestedRegion(DataObject *itkNotUsed(output));
@@ -81,7 +96,8 @@ protected:
 
   void PrintSelf(std::ostream& os, Indent indent) const;
 
-  typename FilterType::Pointer m_Filter;
+  typename InputFilterType::Pointer m_InputFilter;
+  typename OutputFilterType::Pointer m_OutputFilter;
 
 private:
   SliceBySliceImageFilter(const Self&); //purposely not implemented

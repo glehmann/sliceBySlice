@@ -6,18 +6,19 @@
 
 namespace itk {
 
-template <class TInputImage, class TOutputImage, class TFilter>
-SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
 ::SliceBySliceImageFilter()
 {
-  m_Filter = NULL;
+  m_InputFilter = NULL;
+  m_OutputFilter = NULL;
   m_Dimension = ImageDimension - 1;
 }
 
 
-template<class TInputImage, class TOutputImage, class TFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
 void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
 ::GenerateInputRequestedRegion()
 {
   // call the superclass' implementation of this method
@@ -36,42 +37,71 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
 }
 
 
-template<class TInputImage, class TOutputImage, class TFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
 void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
 ::EnlargeOutputRequestedRegion(DataObject *)
 {
-  for( int i=0; i<this->GetNumberOfInputs(); i++)
+  for( int i=0; i<this->GetNumberOfOutputs(); i++)
     {
     this->GetOutput( i )->SetRequestedRegion( this->GetOutput( i )->GetLargestPossibleRegion() );
     }
 }
 
 
-template<class TInputImage, class TOutputImage, class TFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
 void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
-::SetFilter( FilterType * filter )
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
+::SetFilter( InputFilterType * filter )
 {
-  if( m_Filter.GetPointer() != filter )
+  OutputFilterType * outputFilter = dynamic_cast< OutputFilterType * >( filter );
+  if( outputFilter == NULL && filter != NULL )
+    {
+    itkExceptionMacro("Wrong output filter type. Use SetOutputFilter() and SetInputFilter() instead of SetFilter() when input and output filter types are different.");
+    }
+  this->SetInputFilter( filter );
+  this->SetOutputFilter( outputFilter );
+}
+
+
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
+void
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
+::SetInputFilter( InputFilterType * filter )
+{
+  if( m_InputFilter.GetPointer() != filter )
     {
     this->Modified();
-    m_Filter = filter;
+    m_InputFilter = filter;
     // adapt the number of inputs and outputs
     this->SetNumberOfRequiredInputs( filter->GetNumberOfValidRequiredInputs() );
+    }
+}
+
+
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
+void
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
+::SetOutputFilter( OutputFilterType * filter )
+{
+  if( m_OutputFilter.GetPointer() != filter )
+    {
+    this->Modified();
+    m_OutputFilter = filter;
+    // adapt the number of inputs and outputs
     this->SetNumberOfRequiredOutputs( filter->GetNumberOfOutputs() );
     }
 }
 
 
-template <class TInputImage, class TOutputImage, class TFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
 void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
 ::GenerateData()
 {
-  if( !m_Filter )
+  if( !m_InputFilter || !m_OutputFilter )
     {
-    itkExceptionMacro("Filter must be set.");
+    itkExceptionMacro("Filters must be set.");
     }
 
   for( int i=1; i<this->GetNumberOfInputs(); i++)
@@ -115,7 +145,7 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
     internalInputs[i] = InternalInputImageType::New();
     internalInputs[i]->SetRegions( internalRegion );
     internalInputs[i]->Allocate();
-    m_Filter->SetInput( i, internalInputs[i] );
+    m_InputFilter->SetInput( i, internalInputs[i] );
     }
 
   ProgressReporter progress(this, 0, requestedSize[m_Dimension]);
@@ -159,8 +189,9 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
       }
 
     // run the filter on the current slice
-    m_Filter->Modified();
-    m_Filter->UpdateLargestPossibleRegion();
+    m_InputFilter->Modified();
+    m_OutputFilter->Modified(); // should not be needed, but may help in some cases
+    m_OutputFilter->UpdateLargestPossibleRegion();
     progress.CompletedPixel();
     
     // and copy the output slice to the output image
@@ -169,7 +200,7 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
     outputIterators.resize( this->GetNumberOfOutputs() );
     for( int i=0; i<this->GetNumberOfOutputs(); i++)
       {
-      outputIterators[i] = OutputIteratorType( m_Filter->GetOutput( i ), internalRegion );
+      outputIterators[i] = OutputIteratorType( m_OutputFilter->GetOutput( i ), internalRegion );
       outputIterators[i].GoToBegin();
       }
     while( !outputIterators[0].IsAtEnd() )
@@ -202,9 +233,9 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
 }
 
 
-template <class TInputImage, class TOutputImage, class TFilter>
+template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter>
 void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TFilter>
+SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter>
 ::PrintSelf(std::ostream &os, Indent indent) const
 {
   Superclass::PrintSelf(os, indent);
