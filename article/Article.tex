@@ -147,7 +147,120 @@ the highest one.
 }
 \end{verbatim} \normalsize
 
+
+\section{Usage with a full pipeline}
+
+SliceBySliceImageFilter is not restricted to a single filter, and can also be used with a full pipeline.
+Again, an example will help to describe the usage:
+
+We first do the standard includes, and check the command line arguments.
+
+\small \begin{verbatim}
+#include "itkImageFileReader.h"
+#include "itkImageFileWriter.h"
+#include "itkSimpleFilterWatcher.h"
+
+#include "itkAddImageFilter.h"
+#include "itkRescaleIntensityImageFilter.h"
+#include "itkSliceBySliceImageFilter.h"
+
+
+int main(int argc, char * argv[])
+{
+
+  if( argc != 3 )
+    {
+    std::cerr << "usage: " << argv[0] << " input output" << std::endl;
+    exit(1);
+    }
+\end{verbatim} \normalsize
+
+The dimension of the image, the pixel type, and the image type are declared.
+A file reader is created.
+
+\small \begin{verbatim}
+  const int dim = 3;
+  
+  typedef unsigned char PType;
+  typedef itk::Image< PType, dim > IType;
+
+  typedef itk::ImageFileReader< IType > ReaderType;
+  ReaderType::Pointer reader = ReaderType::New();
+  reader->SetFileName( argv[1] );
+\end{verbatim} \normalsize
+
+In this example, a different pixel type is used in the 2D pipeline than the one used in the 3D pipeline, so we must declare the image types, and the filter types used in the 2D pipeline.
+
+\small \begin{verbatim}
+  typedef itk::Image< unsigned short, dim-1 > US2Type;
+  typedef itk::Image< unsigned char, dim-1 > UC2Type;
+
+  typedef itk::AddImageFilter< UC2Type, UC2Type, US2Type > AddType;
+  AddType::Pointer add = AddType::New();
+  
+  typedef itk::RescaleIntensityImageFilter< US2Type, UC2Type > RescaleType;
+  RescaleType::Pointer rescale = RescaleType::New();
+\end{verbatim} \normalsize
+
+The two filters of the 2D pipeline are linked together.
+
+\small \begin{verbatim}
+  rescale->SetInput( add->GetOutput() );
+\end{verbatim} \normalsize
+
+The SliceBySliceImageFilter is instantiated with two more arguments than in the previous example: The type of the input filter in the 2D pipeline (AddType) and the type of the output filter in the 2D pipeline (RescaleType). By default, the type of the input and output filters is $itk::ImageToImageFilter< itk::Image< InputImageType, ImageDimension - 1 >,  itk::Image< OutputImageType, ImageDimension - 1 > >$. Note that it is not always needed to provide those types when using a pipeline.
+
+\small \begin{verbatim}
+  typedef itk::SliceBySliceImageFilter< IType, IType, AddType, RescaleType > FilterType;
+  FilterType::Pointer filter = FilterType::New();
+\end{verbatim} \normalsize
+
+The input filter takes two inputs, so we must provide two input to the SliceBySliceImageFilter.
+
+\small \begin{verbatim}
+  filter->SetInput( 0, reader->GetOutput() );
+  filter->SetInput( 1, reader->GetOutput() );
+\end{verbatim} \normalsize
+
+The input and the output filter are not the same so we have to use the SetInputFilter() and SetOutputFilter() methods instead of SetFilter().
+
+\small \begin{verbatim}
+  filter->SetInputFilter( add );
+  filter->SetOutputFilter( rescale );
+\end{verbatim} \normalsize
+
+Finally, the output is wrote to a file. When \verb$Update()$ is called, the
+slice by slice filter runs the 2D pipeline on all the slices of the image,
+and store the result in its output image. The dimension reduced to pass to
+dimension N-1 can be selected with \verb$SetDimension()$ and defaults to
+the highest one.
+
+\small \begin{verbatim}
+  itk::SimpleFilterWatcher watcher(filter, "filter");
+
+  typedef itk::ImageFileWriter< IType > WriterType;
+  WriterType::Pointer writer = WriterType::New();
+  writer->SetInput( filter->GetOutput() );
+  writer->SetFileName( argv[2] );
+  writer->Update();
+
+  return 0;
+}
+\end{verbatim} \normalsize
+
+
+\section{Improvement since revision 1 and future work}
+
+Since the first revision, the SliceBySliceImageFilter has been improved to suppport:
+\begin{itemize}
+\item several inputs
+\item several outputs
+\item a pipeline of filters
+\end{itemize}
+It still lack a important feature: the ability to have the input and output image of different size.
+
 \section{Conclusion}
+
 The new provided class gives an easy way to perform a slice by slice transform of an image.
 
 
