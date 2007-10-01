@@ -142,7 +142,7 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter, 
   ProgressReporter progress(this, 0, requestedSize[m_Dimension]);
 
   // std::cout << "start: " << requestedIndex[m_Dimension] << "  end: " << requestedSize[m_Dimension] - requestedIndex[m_Dimension] << std::endl;
-  for( int slice=requestedIndex[m_Dimension]; slice < requestedSize[m_Dimension] - requestedIndex[m_Dimension]; slice++ )
+  for( int slice=requestedIndex[m_Dimension]; slice < requestedSize[m_Dimension] + requestedIndex[m_Dimension]; slice++ )
     {
     // std::cout << "slice: " << slice << std::endl;
     // reallocate the internal input at each slice, so the slice by slice filter can work
