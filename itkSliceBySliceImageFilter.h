@@ -90,7 +90,6 @@ public:
   void SetOutputFilter(OutputFilterType * filter);
   itkGetObjectMacro(OutputFilter, OutputFilterType);
 
-  void GenerateInputRequestedRegion() ;
   void EnlargeOutputRequestedRegion(DataObject *itkNotUsed(output));
 
 protected:

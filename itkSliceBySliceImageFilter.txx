@@ -19,32 +19,30 @@ SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter, 
 template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter, class TInternalInputImageType, class TInternalOutputImageType>
 void
 SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter, TInternalInputImageType, TInternalOutputImageType>
-::GenerateInputRequestedRegion()
-{
-  // call the superclass' implementation of this method
-  Superclass::GenerateInputRequestedRegion();
-
-  for( int i=0; i<this->GetNumberOfInputs(); i++)
-    {
-    typename InputImageType::Pointer  inputPtr =
-      const_cast< InputImageType * >( this->GetInput( i ) );
-  
-    if ( !inputPtr )
-      { return; }
-  
-    inputPtr->SetRequestedRegion(inputPtr->GetLargestPossibleRegion());
-    }
-}
-
-
-template <class TInputImage, class TOutputImage, class TInputFilter, class TOutputFilter, class TInternalInputImageType, class TInternalOutputImageType>
-void
-SliceBySliceImageFilter<TInputImage, TOutputImage, TInputFilter, TOutputFilter, TInternalInputImageType, TInternalOutputImageType>
 ::EnlargeOutputRequestedRegion(DataObject *)
 {
   for( int i=0; i<this->GetNumberOfOutputs(); i++)
     {
-    this->GetOutput( i )->SetRequestedRegion( this->GetOutput( i )->GetLargestPossibleRegion() );
+    // extend the requested region to be the full requested slices
+    RegionType region = this->GetOutput( i )->GetRequestedRegion();
+    RegionType largestRegion = this->GetOutput( i )->GetLargestPossibleRegion();
+    IndexType idx = region.GetIndex();
+    SizeType size = region.GetSize();
+    IndexType largestIdx = largestRegion.GetIndex();
+    SizeType largestSize = largestRegion.GetSize();
+
+    for( int j=0; j<ImageDimension; j++ )
+      {
+      if( j != m_Dimension )
+        {
+        idx[j] = largestIdx[j];
+        size[j] = largestSize[j];
+        }
+      }
+    
+    region.SetIndex( idx );
+    region.SetSize( size );
+    this->GetOutput( i )->SetRequestedRegion( region );
     }
 }
 
